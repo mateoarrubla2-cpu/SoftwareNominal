@@ -1,4 +1,4 @@
-import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, HardDrive } from 'lucide-react';
 import {
   exportAllPayslipsPDF,
   exportBenefitsExcel,
@@ -16,9 +16,15 @@ interface ReportsViewProps {
   db: PayrollDatabase;
   period: PayrollPeriod;
   legislation: LegislationParams;
+  onOpenGoogleDrive?: () => void;
 }
 
-export function ReportsView({ db, period, legislation }: ReportsViewProps) {
+export function ReportsView({
+  db,
+  period,
+  legislation,
+  onOpenGoogleDrive,
+}: ReportsViewProps) {
   const deptMap = new Map<
     string,
     { count: number; base: number; aux: number; gross: number; deductions: number; net: number }
@@ -48,13 +54,26 @@ export function ReportsView({ db, period, legislation }: ReportsViewProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Centro de Reportes PDF y Excel — {period.label}
-        </h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Exportación directa para contabilidad SENA / INAMOD, dispersión bancaria y revisión de prestaciones sociales.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Centro de Reportes PDF y Excel — {period.label}
+          </h1>
+          <p className="text-sm text-slate-600 mt-1">
+            Exportación directa para contabilidad SENA / INAMOD, dispersión bancaria y revisión de prestaciones sociales.
+          </p>
+        </div>
+
+        {onOpenGoogleDrive && (
+          <button
+            type="button"
+            onClick={onOpenGoogleDrive}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-md hover:bg-teal-100 cursor-pointer whitespace-nowrap self-start"
+          >
+            <HardDrive className="w-4 h-4" />
+            <span>Google Workspace (Drive / Sheets)</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

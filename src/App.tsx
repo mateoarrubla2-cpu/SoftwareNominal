@@ -8,6 +8,7 @@ import {
   FileCheck2,
   FileCode2,
   Gift,
+  HardDrive,
   Menu,
   Receipt,
   RotateCcw,
@@ -24,6 +25,7 @@ import { CompanySettingsModal } from './components/CompanySettingsModal.tsx';
 import { ElectronicPayrollView } from './components/ElectronicPayrollView.tsx';
 import { EmployeesView } from './components/EmployeesView.tsx';
 import { EventualitiesView } from './components/EventualitiesView.tsx';
+import { GoogleWorkspaceView } from './components/GoogleWorkspaceView.tsx';
 import { LegislationView } from './components/LegislationView.tsx';
 import { PayrollView } from './components/PayrollView.tsx';
 import { PayslipPreviewModal } from './components/PayslipPreviewModal.tsx';
@@ -33,6 +35,7 @@ import { SeveranceView } from './components/SeveranceView.tsx';
 import { SocialBenefitsView } from './components/SocialBenefitsView.tsx';
 import { VacationsView } from './components/VacationsView.tsx';
 import { WorkerPortalView } from './components/WorkerPortalView.tsx';
+import { setExportDriveNotifier } from './lib/exportEngine.ts';
 import type {
   BenefitPlan,
   CompanyConfig,
@@ -63,6 +66,7 @@ type AdminTab =
   | 'legislacion'
   | 'empleados'
   | 'reportes'
+  | 'drive'
   | 'auditoria';
 
 const ADMIN_NAV: { id: AdminTab; label: string; icon: typeof Receipt }[] = [
@@ -77,6 +81,7 @@ const ADMIN_NAV: { id: AdminTab; label: string; icon: typeof Receipt }[] = [
   { id: 'legislacion', label: 'Legislación Actual', icon: Scale },
   { id: 'empleados', label: 'Trabajadores', icon: Users },
   { id: 'reportes', label: 'Reportes PDF / Excel', icon: FileBarChart2 },
+  { id: 'drive', label: 'Google Workspace', icon: HardDrive },
   { id: 'auditoria', label: 'Bitácora de Auditoría', icon: ShieldAlert },
 ];
 
@@ -131,6 +136,11 @@ export default function App() {
 
   useEffect(() => {
     fetchState();
+  }, []);
+
+  useEffect(() => {
+    setExportDriveNotifier((msg) => showToast(msg));
+    return () => setExportDriveNotifier(null);
   }, []);
 
   async function mutate(
@@ -708,6 +718,16 @@ export default function App() {
                   db={db}
                   period={activePeriod}
                   legislation={activeLegislation}
+                  onOpenGoogleDrive={() => setActiveTab('drive')}
+                />
+              )}
+
+              {activeTab === 'drive' && (
+                <GoogleWorkspaceView
+                  db={db}
+                  period={activePeriod}
+                  legislation={activeLegislation}
+                  onNotify={showToast}
                 />
               )}
 

@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { syncExportToDriveIfConnected } from './googleDrive.ts';
 import {
   calculateSocialBenefitsForEmployee,
   formatCOP,
@@ -17,6 +18,35 @@ import type {
   SeveranceRecord,
   VacationRequest,
 } from '../types/payroll.ts';
+
+let exportNotifier: ((msg: string) => void) | null = null;
+
+export function setExportDriveNotifier(fn: ((msg: string) => void) | null): void {
+  exportNotifier = fn;
+}
+
+function maybeSyncToDrive(
+  blob: Blob,
+  filename: string,
+  mimeType: string,
+): void {
+  void syncExportToDriveIfConnected({ blob, filename, mimeType }).then((res) => {
+    if (!exportNotifier) return;
+    if (res.uploaded) {
+      exportNotifier(
+        `"${filename}" descargado y guardado en Google Drive (INAMOD Nómina - SENA)`,
+      );
+    } else if (res.error) {
+      exportNotifier(
+        `"${filename}" descargado localmente (Drive: ${res.error})`,
+      );
+    } else {
+      exportNotifier(
+        `"${filename}" descargado localmente. Conecta Google Drive para guardarlo en la nube.`,
+      );
+    }
+  });
+}
 
 function renderPayslipPage(
   doc: jsPDF,
@@ -249,6 +279,18 @@ function renderPayslipPage(
   );
 }
 
+export function generatePayslipPDFBlob(
+  payslip: Payslip,
+  company: CompanyConfig,
+): { blob: Blob; filename: string } {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  renderPayslipPage(doc, payslip, company);
+  return {
+    blob: doc.output('blob'),
+    filename: `Desprendible_${payslip.receiptNumber}_${payslip.employeeName.replace(/\s+/g, '_')}.pdf`,
+  };
+}
+
 export function exportPayslipPDF(
   payslip: Payslip,
   company: CompanyConfig,
@@ -258,6 +300,21 @@ export function exportPayslipPDF(
   doc.save(
     `Desprendible_${payslip.receiptNumber}_${payslip.employeeName.replace(/\s+/g, '_')}.pdf`,
   );
+}
+
+export function generateAllPayslipsPDFBlob(
+  period: PayrollPeriod,
+  company: CompanyConfig,
+): { blob: Blob; filename: string } {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  period.payslips.forEach((p, idx) => {
+    if (idx > 0) doc.addPage();
+    renderPayslipPage(doc, p, company);
+  });
+  return {
+    blob: doc.output('blob'),
+    filename: `Desprendibles_${period.periodKey}_${period.frequency}.pdf`,
+  };
 }
 
 export function exportAllPayslipsPDF(
@@ -270,13 +327,15 @@ export function exportAllPayslipsPDF(
     if (idx > 0) doc.addPage();
     renderPayslipPage(doc, p, company);
   });
-  doc.save(`Desprendibles_${period.periodKey}_${period.frequency}.pdf`);
+  const filename = `Desprendibles_${period.periodKey}_${period.frequency}.pdf`;
+  doc.save(filename);
+  maybeSyncToDrive(doc.output('blob'), filename, 'application/pdf');
 }
 
-export function exportPayrollReportPDF(
+function buildPayrollReportPDFDoc(
   period: PayrollPeriod,
   company: CompanyConfig,
-): void {
+): jsPDF {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
@@ -378,13 +437,34 @@ export function exportPayrollReportPDF(
     },
   });
 
-  doc.save(`Nomina_INAMOD_${period.periodKey}.pdf`);
+  return doc;
 }
 
-export function exportPayrollWorkbookExcel(
+export function generatePayrollReportPDFBlob(
+  period: PayrollPeriod,
+  company: CompanyConfig,
+): { blob: Blob; filename: string } {
+  const doc = buildPayrollReportPDFDoc(period, company);
+  return {
+    blob: doc.output('blob'),
+    filename: `Nomina_INAMOD_${period.periodKey}.pdf`,
+  };
+}
+
+export function exportPayrollReportPDF(
+  period: PayrollPeriod,
+  company: CompanyConfig,
+): void {
+  const doc = buildPayrollReportPDFDoc(period, company);
+  const filename = `Nomina_INAMOD_${period.periodKey}.pdf`;
+  doc.save(filename);
+  maybeSyncToDrive(doc.output('blob'), filename, 'application/pdf');
+}
+
+function buildPayrollWorkbook(
   db: PayrollDatabase,
   period: PayrollPeriod,
-): void {
+): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
 
   const payrollRows = period.payslips.map((p) => ({
@@ -457,14 +537,45 @@ export function exportPayrollWorkbookExcel(
     'Vacaciones',
   );
 
-  XLSX.writeFile(wb, `Nomina_INAMOD_${period.periodKey}.xlsx`);
+  return wb;
 }
 
-export function exportSocialBenefitsPDF(
+export function generatePayrollWorkbookExcelBlob(
+  db: PayrollDatabase,
+  period: PayrollPeriod,
+): { blob: Blob; filename: string } {
+  const wb = buildPayrollWorkbook(db, period);
+  const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer;
+  return {
+    blob: new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename: `Nomina_INAMOD_${period.periodKey}.xlsx`,
+  };
+}
+
+export function exportPayrollWorkbookExcel(
+  db: PayrollDatabase,
+  period: PayrollPeriod,
+): void {
+  const wb = buildPayrollWorkbook(db, period);
+  const filename = `Nomina_INAMOD_${period.periodKey}.xlsx`;
+  XLSX.writeFile(wb, filename);
+  const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer;
+  maybeSyncToDrive(
+    new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
+}
+
+function buildSocialBenefitsPDFDoc(
   employees: Employee[],
   legislation: LegislationParams,
   company: CompanyConfig,
-): void {
+): jsPDF {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
@@ -530,7 +641,30 @@ export function exportSocialBenefitsPDF(
     },
   });
 
-  doc.save(`Prestaciones_Sociales_${legislation.year}.pdf`);
+  return doc;
+}
+
+export function generateSocialBenefitsPDFBlob(
+  employees: Employee[],
+  legislation: LegislationParams,
+  company: CompanyConfig,
+): { blob: Blob; filename: string } {
+  const doc = buildSocialBenefitsPDFDoc(employees, legislation, company);
+  return {
+    blob: doc.output('blob'),
+    filename: `Prestaciones_Sociales_${legislation.year}.pdf`,
+  };
+}
+
+export function exportSocialBenefitsPDF(
+  employees: Employee[],
+  legislation: LegislationParams,
+  company: CompanyConfig,
+): void {
+  const doc = buildSocialBenefitsPDFDoc(employees, legislation, company);
+  const filename = `Prestaciones_Sociales_${legislation.year}.pdf`;
+  doc.save(filename);
+  maybeSyncToDrive(doc.output('blob'), filename, 'application/pdf');
 }
 
 export function exportSeverancePDF(
@@ -721,7 +855,16 @@ export function exportVacationsExcel(
     Notas: v.notes,
   }));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Vacaciones');
-  XLSX.writeFile(wb, 'Vacaciones_INAMOD_SENA.xlsx');
+  const filename = 'Vacaciones_INAMOD_SENA.xlsx';
+  XLSX.writeFile(wb, filename);
+  const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer;
+  maybeSyncToDrive(
+    new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
 }
 
 export function exportBenefitsPDF(
@@ -786,5 +929,14 @@ export function exportBenefitsExcel(
     };
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Beneficios');
-  XLSX.writeFile(wb, 'Beneficios_INAMOD_SENA.xlsx');
+  const filename = 'Beneficios_INAMOD_SENA.xlsx';
+  XLSX.writeFile(wb, filename);
+  const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' }) as ArrayBuffer;
+  maybeSyncToDrive(
+    new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
 }
