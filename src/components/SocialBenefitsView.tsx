@@ -242,43 +242,51 @@ export function SocialBenefitsView({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-sm">
-                  {calcs.map((c) => (
-                    <tr key={c.employeeId} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-4">
-                        <div className="font-medium text-slate-900 whitespace-nowrap">
-                          {c.employeeName}
-                        </div>
-                        <div className="text-xs text-slate-500 whitespace-nowrap">
-                          {c.department}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                        {formatCOP(c.basePrestacional)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-600 whitespace-nowrap">
-                        {c.daysSemester} d
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-slate-900 whitespace-nowrap">
-                        {formatCOP(c.primaServicios)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-600 whitespace-nowrap">
-                        {c.daysYear} d
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-teal-700 whitespace-nowrap">
-                        {formatCOP(c.cesantias)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                        {formatCOP(c.interesesCesantias)}
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        {c.aplicaDotacion ? (
-                          <StatusIndicator status="Sí aplica" />
-                        ) : (
-                          <span className="text-xs text-slate-500">{c.motivoDotacion}</span>
-                        )}
+                  {calcs.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-10 px-4 text-center text-slate-500">
+                        No hay trabajadores activos para calcular prestaciones sociales.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    calcs.map((c) => (
+                      <tr key={c.employeeId} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-slate-900 whitespace-nowrap">
+                            {c.employeeName}
+                          </div>
+                          <div className="text-xs text-slate-500 whitespace-nowrap">
+                            {c.department}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                          {formatCOP(c.basePrestacional)}
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-600 whitespace-nowrap">
+                          {c.daysSemester} d
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-slate-900 whitespace-nowrap">
+                          {formatCOP(c.primaServicios)}
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-600 whitespace-nowrap">
+                          {c.daysYear} d
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-teal-700 whitespace-nowrap">
+                          {formatCOP(c.cesantias)}
+                        </td>
+                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                          {formatCOP(c.interesesCesantias)}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          {c.aplicaDotacion ? (
+                            <StatusIndicator status="Sí aplica" />
+                          ) : (
+                            <span className="text-xs text-slate-500">{c.motivoDotacion}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -328,53 +336,61 @@ export function SocialBenefitsView({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-sm">
-                  {benefits.map((b) => {
-                    const count = employees.filter((e) =>
-                      e.benefitIds.includes(b.id),
-                    ).length;
-                    return (
-                      <tr key={b.id} className="hover:bg-slate-50/80">
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-slate-900">{b.name}</div>
-                          <div className="text-xs text-slate-500">{b.description}</div>
-                        </td>
-                        <td className="py-3 px-4 text-slate-700 whitespace-nowrap">
-                          {b.category}
-                        </td>
-                        <td className="py-3 px-4 text-xs text-slate-600 whitespace-nowrap">
-                          {b.salarialFactor ? 'Factor Salarial' : 'No constitutivo (Art. 128)'}
-                        </td>
-                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-900 whitespace-nowrap">
-                          {formatCOP(b.monthlyAmount)}
-                        </td>
-                        <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                          {count}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <StatusIndicator status={b.active ? 'Activo' : 'Pausado'} />
-                        </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="inline-flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => setAssigningBenefit(b)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
-                            >
-                              <Users className="w-3.5 h-3.5" />
-                              <span>Asignar ({count})</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openEditBenefit(b)}
-                              className="p-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {benefits.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                        Aún no has creado beneficios adicionales. Haz clic en &quot;Nuevo Beneficio&quot; para agregar uno.
+                      </td>
+                    </tr>
+                  ) : (
+                    benefits.map((b) => {
+                      const count = employees.filter((e) =>
+                        e.benefitIds.includes(b.id),
+                      ).length;
+                      return (
+                        <tr key={b.id} className="hover:bg-slate-50/80">
+                          <td className="py-3 px-4">
+                            <div className="font-medium text-slate-900">{b.name}</div>
+                            <div className="text-xs text-slate-500">{b.description}</div>
+                          </td>
+                          <td className="py-3 px-4 text-slate-700 whitespace-nowrap">
+                            {b.category}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-slate-600 whitespace-nowrap">
+                            {b.salarialFactor ? 'Factor Salarial' : 'No constitutivo (Art. 128)'}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-900 whitespace-nowrap">
+                            {formatCOP(b.monthlyAmount)}
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                            {count}
+                          </td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <StatusIndicator status={b.active ? 'Activo' : 'Pausado'} />
+                          </td>
+                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setAssigningBenefit(b)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                                <span>Asignar ({count})</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => openEditBenefit(b)}
+                                className="p-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

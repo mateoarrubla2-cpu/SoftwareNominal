@@ -214,31 +214,39 @@ export function ReportsView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {departmentRows.map(([dept, stats]) => (
-                <tr key={dept} className="hover:bg-slate-50/80">
-                  <td className="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
-                    {dept}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                    {stats.count}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                    {formatCOP(stats.base)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                    {formatCOP(stats.aux)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                    {formatCOP(stats.gross)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
-                    -{formatCOP(stats.deductions)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
-                    {formatCOP(stats.net)}
+              {departmentRows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    No hay nómina liquidada en este período para consolidar por área.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                departmentRows.map(([dept, stats]) => (
+                  <tr key={dept} className="hover:bg-slate-50/80">
+                    <td className="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
+                      {dept}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                      {stats.count}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                      {formatCOP(stats.base)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                      {formatCOP(stats.aux)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                      {formatCOP(stats.gross)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
+                      -{formatCOP(stats.deductions)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                      {formatCOP(stats.net)}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

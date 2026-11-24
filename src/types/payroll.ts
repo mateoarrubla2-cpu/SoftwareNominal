@@ -1,4 +1,4 @@
-export type UserRole = 'ADMINISTRADOR' | 'TRABAJADOR';
+export type UserRole = 'ADMINISTRADOR' | 'INSTRUCTOR' | 'ESTUDIANTE';
 
 export type Department =
   | 'Investigación Textil'
@@ -284,4 +284,75 @@ export interface PayrollDatabase {
   severances: SeveranceRecord[];
   electronicDocs: ElectronicPayrollDoc[];
   auditLogs: AuditLogEntry[];
+}
+
+export interface SenaInstructor {
+  id: string;
+  fullName: string;
+  documentId: string;
+  email: string;
+  specialty: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface SenaFicha {
+  id: string;
+  code: string;
+  name: string;
+  schedule: string;
+  program: string;
+  instructorId: string;
+  createdAt: string;
+}
+
+export interface SenaStudent {
+  id: string;
+  fullName: string;
+  documentId: string;
+  email: string;
+  fichaId: string;
+  instructorId: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface WorkspaceSummary {
+  employeeCount: number;
+  payslipCount: number;
+  vacationCount: number;
+  eventualityCount: number;
+  severanceCount: number;
+  latestPeriodStatus: PayrollPeriodStatus;
+}
+
+export interface SenaGlobalStats {
+  totalInstructors: number;
+  activeInstructors: number;
+  totalFichas: number;
+  totalStudents: number;
+  activeStudents: number;
+  totalWorkersAcrossWorkspaces: number;
+  totalPayslipsAcrossWorkspaces: number;
+}
+
+export interface SenaPlatformState {
+  schemaVersion: number;
+  instructors: SenaInstructor[];
+  fichas: SenaFicha[];
+  students: SenaStudent[];
+  workspaces: Record<string, PayrollDatabase>;
+}
+
+export interface ScopedPlatformResponse {
+  schemaVersion: number;
+  role: UserRole;
+  actorId: string;
+  activeWorkspaceId: string;
+  globalStats: SenaGlobalStats;
+  instructors: SenaInstructor[];
+  fichas: SenaFicha[];
+  students: SenaStudent[];
+  workspaces: Record<string, PayrollDatabase>;
+  workspaceSummaries: Record<string, WorkspaceSummary>;
 }

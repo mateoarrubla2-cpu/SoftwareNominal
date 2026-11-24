@@ -172,7 +172,7 @@ export function SeveranceView({
 
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || !selectedEmployee}
             className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 disabled:opacity-60 cursor-pointer"
           >
             <FileCheck2 className="w-4 h-4" />
@@ -181,6 +181,12 @@ export function SeveranceView({
             </span>
           </button>
         </form>
+
+        {!livePreview && (
+          <div className="lg:col-span-7 bg-white border border-slate-200 rounded-lg p-8 text-center text-sm text-slate-500">
+            Registra al menos un trabajador en la pestaña <span className="font-semibold text-slate-800">Trabajadores</span> para simular su liquidación definitiva y prestaciones proporcionales.
+          </div>
+        )}
 
         {/* Live Calculation Preview */}
         {livePreview && (
@@ -281,43 +287,51 @@ export function SeveranceView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {severances.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 font-mono text-xs text-slate-700 whitespace-nowrap">
-                    {s.id}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-slate-900 whitespace-nowrap">
-                      {s.employeeName}
-                    </div>
-                    <div className="text-xs text-slate-500 whitespace-nowrap">
-                      {s.contractType} · {s.department}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-slate-700 whitespace-nowrap">
-                    {s.cause}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
-                    {formatShortDate(s.terminationDate)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-teal-700 whitespace-nowrap">
-                    {formatCOP(s.indemnizacionAmount)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
-                    {formatCOP(s.totalLiquidation)}
-                  </td>
-                  <td className="py-3 px-4 text-right whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => exportSeverancePDF(s, company)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Acta PDF</span>
-                    </button>
+              {severances.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    No hay liquidaciones definitivas emitidas todavía.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                severances.map((s) => (
+                  <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono text-xs text-slate-700 whitespace-nowrap">
+                      {s.id}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-slate-900 whitespace-nowrap">
+                        {s.employeeName}
+                      </div>
+                      <div className="text-xs text-slate-500 whitespace-nowrap">
+                        {s.contractType} · {s.department}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-slate-700 whitespace-nowrap">
+                      {s.cause}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
+                      {formatShortDate(s.terminationDate)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-teal-700 whitespace-nowrap">
+                      {formatCOP(s.indemnizacionAmount)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                      {formatCOP(s.totalLiquidation)}
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => exportSeverancePDF(s, company)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Acta PDF</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

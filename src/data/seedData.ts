@@ -14,6 +14,10 @@ import type {
   LegislationParams,
   PayrollDatabase,
   PayrollPeriod,
+  SenaFicha,
+  SenaInstructor,
+  SenaPlatformState,
+  SenaStudent,
   VacationRequest,
 } from '../types/payroll.ts';
 
@@ -331,7 +335,12 @@ function buildSeedPeriod(params: {
   };
 }
 
-export function createInitialSeedData(): PayrollDatabase {
+export function createInitialSeedData(overrides?: {
+  companyName?: string;
+}): PayrollDatabase {
+  const customCompany: CompanyConfig = overrides?.companyName
+    ? { ...company, name: overrides.companyName }
+    : { ...company };
   const octPeriod = buildSeedPeriod({
     periodKey: '2026-10',
     label: 'Octubre 2026',
@@ -376,7 +385,7 @@ export function createInitialSeedData(): PayrollDatabase {
 
   const electronicDocs: ElectronicPayrollDoc[] = [
     ...octPeriod.payslips.map((p, idx) => {
-      const doc = buildElectronicDocFromPayslip(p, company);
+      const doc = buildElectronicDocFromPayslip(p, customCompany);
       doc.status = idx === 3 ? 'RECHAZADO' : 'APROBADO';
       doc.dianMessage =
         idx === 3
@@ -386,7 +395,7 @@ export function createInitialSeedData(): PayrollDatabase {
       doc.updatedAt = '2026-10-30T11:05:00.000Z';
       return doc;
     }),
-    ...novPeriod.payslips.map((p) => buildElectronicDocFromPayslip(p, company)),
+    ...novPeriod.payslips.map((p) => buildElectronicDocFromPayslip(p, customCompany)),
   ];
 
   const sampleSeverance = calculateSeveranceLiquidation({
@@ -423,8 +432,8 @@ export function createInitialSeedData(): PayrollDatabase {
     },
     {
       id: 'AUD-003',
-      usuario: 'elena.vargas@inamod.sena.edu.co',
-      rol: 'TRABAJADOR',
+      usuario: 'laura.gomez@soy.sena.edu.co',
+      rol: 'ESTUDIANTE',
       accion: 'CREATE',
       entidadAfectada: 'Vacacion:VAC-2026-02',
       datosAnteriores: 'null',
@@ -501,16 +510,178 @@ export function createInitialSeedData(): PayrollDatabase {
   ];
 
   return {
-    schemaVersion: 3,
-    company,
-    legislation,
-    employees,
-    benefits,
-    vacations,
-    eventualities,
+    schemaVersion: 4,
+    company: customCompany,
+    legislation: structuredClone(legislation),
+    employees: structuredClone(employees),
+    benefits: structuredClone(benefits),
+    vacations: structuredClone(vacations),
+    eventualities: structuredClone(eventualities),
     periods: [novPeriod, octPeriod],
     severances: [sampleSeverance],
     electronicDocs,
     auditLogs,
+  };
+}
+
+export function createBlankPayrollWorkspace(options?: {
+  companyName?: string;
+  city?: string;
+}): PayrollDatabase {
+  const blankCompany: CompanyConfig = {
+    name: options?.companyName ?? 'Práctica Formativa SENA · Nómina',
+    nit: '899.999.034-1',
+    address: 'Centro de Formación SENA Regional Antioquia',
+    city: options?.city ?? 'Medellín, Antioquia',
+    activeYear: 2026,
+    defaultFrequency: 'Mensual',
+  };
+
+  const initialPeriod: PayrollPeriod = {
+    periodKey: '2026-11',
+    label: 'Noviembre 2026',
+    year: 2026,
+    frequency: 'Mensual',
+    status: 'Borrador',
+    processedAt: null,
+    paidAt: null,
+    adjustments: {},
+    payslips: [],
+  };
+
+  return {
+    schemaVersion: 4,
+    company: blankCompany,
+    legislation: structuredClone(legislation),
+    employees: [],
+    benefits: [],
+    vacations: [],
+    eventualities: [],
+    periods: [initialPeriod],
+    severances: [],
+    electronicDocs: [],
+    auditLogs: [],
+  };
+}
+
+export function createInitialSenaPlatformData(): SenaPlatformState {
+  const instructors: SenaInstructor[] = [
+    {
+      id: 'INST-001',
+      fullName: 'Prof. Alejandro Restrepo Mejía',
+      documentId: '71380412',
+      email: 'alejandro.restrepo@misena.edu.co',
+      specialty: 'Gestión del Talento Humano y Nómina',
+      active: true,
+      createdAt: '2026-02-01T08:00:00.000Z',
+    },
+    {
+      id: 'INST-002',
+      fullName: 'Prof. Valeria Montoya Castaño',
+      documentId: '43912874',
+      email: 'valeria.montoya@misena.edu.co',
+      specialty: 'Contabilidad, Prestaciones y Legislación Laboral',
+      active: true,
+      createdAt: '2026-02-10T08:00:00.000Z',
+    },
+  ];
+
+  const fichas: SenaFicha[] = [
+    {
+      id: 'FIC-001',
+      code: '2847102',
+      name: 'Recursos Humanos Mañana',
+      schedule: 'Mañana (06:00 - 12:00)',
+      program: 'Técnico en Recursos Humanos',
+      instructorId: 'INST-001',
+      createdAt: '2026-02-15T07:00:00.000Z',
+    },
+    {
+      id: 'FIC-002',
+      code: '2847105',
+      name: 'Recursos Humanos Tarde',
+      schedule: 'Tarde (12:30 - 18:30)',
+      program: 'Tecnólogo en Gestión del Talento Humano',
+      instructorId: 'INST-001',
+      createdAt: '2026-02-16T13:00:00.000Z',
+    },
+    {
+      id: 'FIC-003',
+      code: '2910440',
+      name: 'Nómina y Prestaciones Noche',
+      schedule: 'Noche (18:30 - 22:00)',
+      program: 'Técnico en Contabilización de Operaciones Comerciales',
+      instructorId: 'INST-002',
+      createdAt: '2026-03-01T18:30:00.000Z',
+    },
+  ];
+
+  const students: SenaStudent[] = [
+    {
+      id: 'EST-001',
+      fullName: 'Laura Sofía Gómez Pérez',
+      documentId: '1037654321',
+      email: 'laura.gomez@soy.sena.edu.co',
+      fichaId: 'FIC-001',
+      instructorId: 'INST-001',
+      active: true,
+      createdAt: '2026-02-20T08:00:00.000Z',
+    },
+    {
+      id: 'EST-002',
+      fullName: 'Juan David Ospina Ríos',
+      documentId: '1020987654',
+      email: 'juan.ospina@soy.sena.edu.co',
+      fichaId: 'FIC-001',
+      instructorId: 'INST-001',
+      active: true,
+      createdAt: '2026-02-20T08:15:00.000Z',
+    },
+    {
+      id: 'EST-003',
+      fullName: 'Mariana Herrera Zapata',
+      documentId: '1017882233',
+      email: 'mariana.herrera@soy.sena.edu.co',
+      fichaId: 'FIC-002',
+      instructorId: 'INST-001',
+      active: true,
+      createdAt: '2026-02-21T13:00:00.000Z',
+    },
+    {
+      id: 'EST-004',
+      fullName: 'Santiago Morales Londoño',
+      documentId: '1036778899',
+      email: 'santiago.morales@soy.sena.edu.co',
+      fichaId: 'FIC-003',
+      instructorId: 'INST-002',
+      active: true,
+      createdAt: '2026-03-02T18:30:00.000Z',
+    },
+  ];
+
+  const workspaces: Record<string, PayrollDatabase> = {
+    'ficha:FIC-001': createInitialSeedData({
+      companyName: 'Ficha 2847102 · Recursos Humanos Mañana',
+    }),
+    'ficha:FIC-002': createBlankPayrollWorkspace({
+      companyName: 'Ficha 2847105 · Recursos Humanos Tarde',
+    }),
+    'ficha:FIC-003': createBlankPayrollWorkspace({
+      companyName: 'Ficha 2910440 · Nómina y Prestaciones Noche',
+    }),
+  };
+
+  for (const st of students) {
+    workspaces[`student:${st.id}`] = createBlankPayrollWorkspace({
+      companyName: `Práctica SENA · ${st.fullName}`,
+    });
+  }
+
+  return {
+    schemaVersion: 4,
+    instructors,
+    fichas,
+    students,
+    workspaces,
   };
 }

@@ -70,35 +70,43 @@ export function AuditLogsView({ logs }: AuditLogsViewProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-xs">
-              {filtered.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50/80">
-                  <td className="py-3 px-4 font-mono text-slate-600 tabular-nums whitespace-nowrap">
-                    {formatShortDate(log.timestamp)} ·{' '}
-                    {log.timestamp.slice(11, 19)}
-                  </td>
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <div className="font-medium text-slate-900">{log.usuario}</div>
-                    <div className="font-mono text-slate-500">{log.rol}</div>
-                  </td>
-                  <td className="py-3 px-4 font-mono font-semibold text-teal-700 whitespace-nowrap">
-                    {log.accion}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-slate-800 whitespace-nowrap">
-                    {log.entidadAfectada}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-slate-600 max-w-md">
-                    <div className="truncate" title={log.datosAnteriores}>
-                      Ant: {log.datosAnteriores}
-                    </div>
-                    <div className="truncate text-slate-900" title={log.datosNuevos}>
-                      Nvo: {log.datosNuevos}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
-                    {log.ipOrigen}
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-10 px-4 text-center text-sm text-slate-500">
+                    Aún no hay movimientos registrados en la bitácora de auditoría de este espacio.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map((log) => (
+                  <tr key={log.id} className="hover:bg-slate-50/80">
+                    <td className="py-3 px-4 font-mono text-slate-600 tabular-nums whitespace-nowrap">
+                      {formatShortDate(log.timestamp)} ·{' '}
+                      {log.timestamp.slice(11, 19)}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <div className="font-medium text-slate-900">{log.usuario}</div>
+                      <div className="font-mono text-slate-500">{log.rol}</div>
+                    </td>
+                    <td className="py-3 px-4 font-mono font-semibold text-teal-700 whitespace-nowrap">
+                      {log.accion}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-slate-800 whitespace-nowrap">
+                      {log.entidadAfectada}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-slate-600 max-w-md">
+                      <div className="truncate" title={log.datosAnteriores}>
+                        Ant: {log.datosAnteriores}
+                      </div>
+                      <div className="truncate text-slate-900" title={log.datosNuevos}>
+                        Nvo: {log.datosNuevos}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
+                      {log.ipOrigen}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

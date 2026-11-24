@@ -221,76 +221,86 @@ export function EmployeesView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {filtered.map((emp) => {
-                const accrued = calculateAccruedVacationDays(
-                  emp.hireDate,
-                  '2026-11-17',
-                  legislation.vacacionesDiasPorAno,
-                );
-                const avail = Math.max(
-                  0,
-                  Math.round(
-                    (accrued - emp.usedVacationDays - emp.compensatedVacationDays) * 10,
-                  ) / 10,
-                );
-                return (
-                  <tr key={emp.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-900 whitespace-nowrap">
-                        {emp.fullName}
-                      </div>
-                      <div className="text-xs text-slate-500 whitespace-nowrap">
-                        <span className="font-mono">C.C. {maskDocumentId(emp.documentId)}</span>
-                        <span aria-hidden="true"> · </span>
-                        <span>{emp.role}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <div className="text-slate-800">{emp.department}</div>
-                      <div className="text-xs text-slate-500">
-                        {emp.contractType} · {formatShortDate(emp.hireDate)}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-slate-900 whitespace-nowrap">
-                      {formatCOP(emp.baseSalary)}
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <div className="text-xs font-mono text-slate-800">
-                        Riesgo ARL N.{emp.arlRiskLevel} ({legislation.arlRates[emp.arlRiskLevel]}%)
-                      </div>
-                      <div className="text-xs font-mono text-slate-500">
-                        {emp.bankName} {maskBankAccount(emp.bankAccountNumber)}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-teal-700 whitespace-nowrap">
-                      {avail} d
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <StatusIndicator status={emp.status} />
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(emp)}
-                          className="p-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
-                          title="Editar trabajador"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onDeleteEmployee(emp.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-700 border border-slate-200 rounded hover:bg-rose-50 cursor-pointer"
-                          title="Eliminar trabajador"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    {employees.length === 0
+                      ? 'Este panel está en blanco. Haz clic en "Nuevo Trabajador" para registrar tu primer trabajador de práctica.'
+                      : 'No hay trabajadores que coincidan con el filtro seleccionado.'}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((emp) => {
+                  const accrued = calculateAccruedVacationDays(
+                    emp.hireDate,
+                    '2026-11-17',
+                    legislation.vacacionesDiasPorAno,
+                  );
+                  const avail = Math.max(
+                    0,
+                    Math.round(
+                      (accrued - emp.usedVacationDays - emp.compensatedVacationDays) * 10,
+                    ) / 10,
+                  );
+                  return (
+                    <tr key={emp.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-slate-900 whitespace-nowrap">
+                          {emp.fullName}
+                        </div>
+                        <div className="text-xs text-slate-500 whitespace-nowrap">
+                          <span className="font-mono">C.C. {maskDocumentId(emp.documentId)}</span>
+                          <span aria-hidden="true"> · </span>
+                          <span>{emp.role}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <div className="text-slate-800">{emp.department}</div>
+                        <div className="text-xs text-slate-500">
+                          {emp.contractType} · {formatShortDate(emp.hireDate)}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-slate-900 whitespace-nowrap">
+                        {formatCOP(emp.baseSalary)}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <div className="text-xs font-mono text-slate-800">
+                          Riesgo ARL N.{emp.arlRiskLevel} ({legislation.arlRates[emp.arlRiskLevel]}%)
+                        </div>
+                        <div className="text-xs font-mono text-slate-500">
+                          {emp.bankName} {maskBankAccount(emp.bankAccountNumber)}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-teal-700 whitespace-nowrap">
+                        {avail} d
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <StatusIndicator status={emp.status} />
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(emp)}
+                            className="p-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 rounded hover:bg-slate-50 cursor-pointer"
+                            title="Editar trabajador"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDeleteEmployee(emp.id)}
+                            className="p-1.5 text-slate-500 hover:text-rose-700 border border-slate-200 rounded hover:bg-rose-50 cursor-pointer"
+                            title="Eliminar trabajador"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -497,27 +507,33 @@ export function EmployeesView({
                 <p className="text-xs font-semibold text-slate-700 mb-2">
                   Beneficios Adicionales Asignados
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {benefits.map((b) => (
-                    <label
-                      key={b.id}
-                      className="flex items-center justify-between gap-2 px-3 py-2 rounded-md border border-slate-200 text-sm cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2 min-w-0">
-                        <input
-                          type="checkbox"
-                          checked={selectedBenefits.includes(b.id)}
-                          onChange={() => toggleBenefit(b.id)}
-                          className="accent-teal-700"
-                        />
-                        <span className="truncate">{b.name}</span>
-                      </span>
-                      <span className="font-mono text-xs text-slate-600 shrink-0">
-                        {formatCOP(b.monthlyAmount)}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                {benefits.length === 0 ? (
+                  <p className="text-xs text-slate-500">
+                    No hay beneficios adicionales creados aún (puedes crearlos luego en Prestaciones y Beneficios).
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {benefits.map((b) => (
+                      <label
+                        key={b.id}
+                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-md border border-slate-200 text-sm cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={selectedBenefits.includes(b.id)}
+                            onChange={() => toggleBenefit(b.id)}
+                            className="accent-teal-700"
+                          />
+                          <span className="truncate">{b.name}</span>
+                        </span>
+                        <span className="font-mono text-xs text-slate-600 shrink-0">
+                          {formatCOP(b.monthlyAmount)}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">

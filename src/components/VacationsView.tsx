@@ -143,8 +143,9 @@ export function VacationsView({
 
           <button
             type="button"
+            disabled={employees.length === 0}
             onClick={() => openNewModal()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 cursor-pointer whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 disabled:opacity-50 cursor-pointer whitespace-nowrap shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Nueva Solicitud / Compensación</span>
@@ -216,60 +217,68 @@ export function VacationsView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {filteredRequests.map((v) => {
-                const emp = empMap.get(v.employeeId);
-                return (
-                  <tr key={v.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-900 whitespace-nowrap">
-                        {emp?.fullName ?? v.employeeId}
-                      </div>
-                      <div className="text-xs text-slate-500 whitespace-nowrap">
-                        {v.id} · {v.notes || 'Sin observaciones'}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-slate-700 whitespace-nowrap">
-                      {v.type}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-xs text-slate-700 whitespace-nowrap">
-                      {formatShortDate(v.startDate)} — {formatShortDate(v.endDate)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
-                      {v.businessDays}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-teal-700 whitespace-nowrap">
-                      {v.compensatedAmount > 0 ? formatCOP(v.compensatedAmount) : '—'}
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <StatusIndicator status={v.status} />
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      {v.status === 'Pendiente' ? (
-                        <div className="inline-flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => onUpdateVacationStatus(v.id, 'Aprobada')}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-teal-700 rounded hover:bg-teal-800 cursor-pointer"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Aprobar</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onUpdateVacationStatus(v.id, 'Rechazada')}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-white border border-rose-200 rounded hover:bg-rose-50 cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                            <span>Rechazar</span>
-                          </button>
+              {filteredRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    No hay solicitudes de vacaciones registradas.
+                  </td>
+                </tr>
+              ) : (
+                filteredRequests.map((v) => {
+                  const emp = empMap.get(v.employeeId);
+                  return (
+                    <tr key={v.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-slate-900 whitespace-nowrap">
+                          {emp?.fullName ?? v.employeeId}
                         </div>
-                      ) : (
-                        <span className="text-xs text-slate-400">Resuelta</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+                        <div className="text-xs text-slate-500 whitespace-nowrap">
+                          {v.id} · {v.notes || 'Sin observaciones'}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-slate-700 whitespace-nowrap">
+                        {v.type}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-xs text-slate-700 whitespace-nowrap">
+                        {formatShortDate(v.startDate)} — {formatShortDate(v.endDate)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                        {v.businessDays}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-teal-700 whitespace-nowrap">
+                        {v.compensatedAmount > 0 ? formatCOP(v.compensatedAmount) : '—'}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <StatusIndicator status={v.status} />
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        {v.status === 'Pendiente' ? (
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => onUpdateVacationStatus(v.id, 'Aprobada')}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-teal-700 rounded hover:bg-teal-800 cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Aprobar</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onUpdateVacationStatus(v.id, 'Rechazada')}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-white border border-rose-200 rounded hover:bg-rose-50 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                              <span>Rechazar</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">Resuelta</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -296,50 +305,58 @@ export function VacationsView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {employees.map((emp) => {
-                const accrued = calculateAccruedVacationDays(
-                  emp.hireDate,
-                  '2026-11-17',
-                  legislation.vacacionesDiasPorAno,
-                );
-                const avail = Math.max(
-                  0,
-                  Math.round(
-                    (accrued - emp.usedVacationDays - emp.compensatedVacationDays) * 10,
-                  ) / 10,
-                );
-                return (
-                  <tr key={emp.id} className="hover:bg-slate-50/80">
-                    <td className="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
-                      {emp.fullName}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
-                      {formatShortDate(emp.hireDate)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                      {accrued} d
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                      {emp.usedVacationDays} d
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                      {emp.compensatedVacationDays} d
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-teal-700 whitespace-nowrap">
-                      {avail} d
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <button
-                        type="button"
-                        onClick={() => openNewModal(emp.id)}
-                        className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
-                      >
-                        Solicitar
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {employees.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    Agrega trabajadores para visualizar su causación de vacaciones.
+                  </td>
+                </tr>
+              ) : (
+                employees.map((emp) => {
+                  const accrued = calculateAccruedVacationDays(
+                    emp.hireDate,
+                    '2026-11-17',
+                    legislation.vacacionesDiasPorAno,
+                  );
+                  const avail = Math.max(
+                    0,
+                    Math.round(
+                      (accrued - emp.usedVacationDays - emp.compensatedVacationDays) * 10,
+                    ) / 10,
+                  );
+                  return (
+                    <tr key={emp.id} className="hover:bg-slate-50/80">
+                      <td className="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
+                        {emp.fullName}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
+                        {formatShortDate(emp.hireDate)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                        {accrued} d
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                        {emp.usedVacationDays} d
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                        {emp.compensatedVacationDays} d
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-teal-700 whitespace-nowrap">
+                        {avail} d
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => openNewModal(emp.id)}
+                          className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
+                        >
+                          Solicitar
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

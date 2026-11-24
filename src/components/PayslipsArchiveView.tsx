@@ -113,69 +113,77 @@ export function PayslipsArchiveView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {filtered.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/80">
-                  <td className="py-3 px-4 font-mono text-xs font-medium text-slate-700 whitespace-nowrap">
-                    {p.receiptNumber}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-slate-900 whitespace-nowrap">
-                      {p.employeeName}
-                    </div>
-                    <div className="text-xs text-slate-500 whitespace-nowrap">
-                      {p.department} · {p.employeeRole}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
-                    {p.bankName} {p.bankAccountMasked}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                    {formatCOP(p.grossPay)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
-                    -{formatCOP(p.totalDeductions)}
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
-                    {formatCOP(p.netPay)}
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap">
-                    {formatShortDate(p.generatedAt)}
-                  </td>
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <StatusIndicator status={p.paymentStatus} />
-                  </td>
-                  <td className="py-3 px-4 text-right whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1.5">
-                      {p.paymentStatus === 'Pendiente' && (
-                        <button
-                          type="button"
-                          onClick={() => onMarkPayslipPaid(period.periodKey, p.id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-teal-700 bg-white border border-teal-300 rounded hover:bg-teal-50 cursor-pointer"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Pagar</span>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => onPreviewPayslip(p)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Vista</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => exportPayslipPDF(p, db.company)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>PDF</span>
-                      </button>
-                    </div>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-10 px-4 text-center text-slate-500">
+                    No hay desprendibles de pago en este período.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50/80">
+                    <td className="py-3 px-4 font-mono text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {p.receiptNumber}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-slate-900 whitespace-nowrap">
+                        {p.employeeName}
+                      </div>
+                      <div className="text-xs text-slate-500 whitespace-nowrap">
+                        {p.department} · {p.employeeRole}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
+                      {p.bankName} {p.bankAccountMasked}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                      {formatCOP(p.grossPay)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
+                      -{formatCOP(p.totalDeductions)}
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                      {formatCOP(p.netPay)}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap">
+                      {formatShortDate(p.generatedAt)}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <StatusIndicator status={p.paymentStatus} />
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5">
+                        {p.paymentStatus === 'Pendiente' && (
+                          <button
+                            type="button"
+                            onClick={() => onMarkPayslipPaid(period.periodKey, p.id)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-teal-700 bg-white border border-teal-300 rounded hover:bg-teal-50 cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Pagar</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => onPreviewPayslip(p)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Vista</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => exportPayslipPDF(p, db.company)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>PDF</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

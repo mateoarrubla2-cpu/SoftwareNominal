@@ -341,75 +341,85 @@ export function PayrollView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {filtered.map((p) => {
-                const extras = p.overtimeAmount + p.performanceBonus;
-                const ss = p.saludDeduction + p.pensionDeduction;
-                const taxes = p.fspDeduction + p.retefuenteDeduction + p.otherDeductions;
-                return (
-                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-900 whitespace-nowrap">
-                        {p.employeeName}
-                      </div>
-                      <div className="text-xs text-slate-500 whitespace-nowrap">
-                        <span className="font-mono">{p.receiptNumber}</span> · {p.department}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-800 whitespace-nowrap">
-                      {formatCOP(p.baseSalaryPeriod)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                      {p.auxilioTransporte > 0 ? formatCOP(p.auxilioTransporte) : '—'}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
-                      {extras > 0 ? `+${formatCOP(extras)}` : '—'}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-teal-700 whitespace-nowrap">
-                      {p.benefitsTotal > 0 ? `+${formatCOP(p.benefitsTotal)}` : '—'}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
-                      -{formatCOP(ss)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
-                      {taxes > 0 ? `-${formatCOP(taxes)}` : '—'}
-                    </td>
-                    <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
-                      {formatCOP(p.netPay)}
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <StatusIndicator status={p.paymentStatus} />
-                    </td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1.5">
-                        {period.status !== 'Pagada' && (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="py-10 px-4 text-center text-slate-500">
+                    {period.payslips.length === 0
+                      ? 'La nómina de este período está en blanco. Registra trabajadores en la pestaña "Trabajadores" para liquidar automáticamente.'
+                      : 'No se encontraron desprendibles con ese filtro.'}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((p) => {
+                  const extras = p.overtimeAmount + p.performanceBonus;
+                  const ss = p.saludDeduction + p.pensionDeduction;
+                  const taxes = p.fspDeduction + p.retefuenteDeduction + p.otherDeductions;
+                  return (
+                    <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-slate-900 whitespace-nowrap">
+                          {p.employeeName}
+                        </div>
+                        <div className="text-xs text-slate-500 whitespace-nowrap">
+                          <span className="font-mono">{p.receiptNumber}</span> · {p.department}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-800 whitespace-nowrap">
+                        {formatCOP(p.baseSalaryPeriod)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                        {p.auxilioTransporte > 0 ? formatCOP(p.auxilioTransporte) : '—'}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-700 whitespace-nowrap">
+                        {extras > 0 ? `+${formatCOP(extras)}` : '—'}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-teal-700 whitespace-nowrap">
+                        {p.benefitsTotal > 0 ? `+${formatCOP(p.benefitsTotal)}` : '—'}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
+                        -{formatCOP(ss)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums text-rose-700 whitespace-nowrap">
+                        {taxes > 0 ? `-${formatCOP(taxes)}` : '—'}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-slate-900 whitespace-nowrap">
+                        {formatCOP(p.netPay)}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <StatusIndicator status={p.paymentStatus} />
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5">
+                          {period.status !== 'Pagada' && (
+                            <button
+                              type="button"
+                              onClick={() => openAdjustmentModal(p)}
+                              className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
+                            >
+                              <SlidersHorizontal className="w-3.5 h-3.5 inline mr-1" />
+                              Novedades
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => openAdjustmentModal(p)}
+                            onClick={() => onPreviewPayslip(p)}
                             className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
                           >
-                            <SlidersHorizontal className="w-3.5 h-3.5 inline mr-1" />
-                            Novedades
+                            Desprendible
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => onPreviewPayslip(p)}
-                          className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
-                        >
-                          Desprendible
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => exportPayslipPDF(p, db.company)}
-                          className="px-2.5 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded hover:bg-teal-100 cursor-pointer"
-                        >
-                          PDF
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          <button
+                            type="button"
+                            onClick={() => exportPayslipPDF(p, db.company)}
+                            className="px-2.5 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded hover:bg-teal-100 cursor-pointer"
+                          >
+                            PDF
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

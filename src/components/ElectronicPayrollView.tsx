@@ -119,80 +119,88 @@ export function ElectronicPayrollView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-sm">
-              {periodDocs.map((doc) => (
-                <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 font-mono text-xs font-medium text-slate-800 whitespace-nowrap">
-                    {doc.receiptNumber}
+              {periodDocs.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    Aún no hay documentos electrónicos XML en este período. Agrega trabajadores y liquida la nómina para generar sus CUNE automáticamente.
                   </td>
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-slate-900 whitespace-nowrap">
-                      {doc.employeeName}
-                    </div>
-                    <div className="text-xs text-slate-500 font-mono">
-                      C.C. {doc.employeeDocumentId}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
-                    {doc.cune.slice(0, 18)}…
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-slate-900 whitespace-nowrap">
-                    {formatCOP(doc.netPay)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <StatusIndicator status={doc.status} />
-                    <p className="text-xs text-slate-500 max-w-xs truncate mt-0.5">
-                      {doc.dianMessage}
-                    </p>
-                  </td>
-                  <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-600 whitespace-nowrap">
-                    {doc.retryCount}
-                  </td>
-                  <td className="py-3 px-4 text-right whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setInspectingDoc(doc)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
-                      >
-                        <Code2 className="w-3.5 h-3.5" />
-                        <span>XML</span>
-                      </button>
+                </tr>
+              ) : (
+                periodDocs.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono text-xs font-medium text-slate-800 whitespace-nowrap">
+                      {doc.receiptNumber}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-slate-900 whitespace-nowrap">
+                        {doc.employeeName}
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono">
+                        C.C. {doc.employeeDocumentId}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-600 whitespace-nowrap">
+                      {doc.cune.slice(0, 18)}…
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums font-medium text-slate-900 whitespace-nowrap">
+                      {formatCOP(doc.netPay)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <StatusIndicator status={doc.status} />
+                      <p className="text-xs text-slate-500 max-w-xs truncate mt-0.5">
+                        {doc.dianMessage}
+                      </p>
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono tabular-nums text-slate-600 whitespace-nowrap">
+                      {doc.retryCount}
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setInspectingDoc(doc)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 cursor-pointer"
+                        >
+                          <Code2 className="w-3.5 h-3.5" />
+                          <span>XML</span>
+                        </button>
 
-                      {doc.status === 'PENDIENTE' && (
-                        <>
+                        {doc.status === 'PENDIENTE' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => onEmitDoc(doc.id, false)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-teal-700 rounded hover:bg-teal-800 cursor-pointer"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              <span>Emitir</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onEmitDoc(doc.id, true)}
+                              className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-amber-700 bg-white border border-amber-300 rounded hover:bg-amber-50 cursor-pointer"
+                              title="Simular rechazo técnico DIAN para probar flujo de reintento"
+                            >
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+
+                        {doc.status === 'RECHAZADO' && (
                           <button
                             type="button"
                             onClick={() => onEmitDoc(doc.id, false)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-teal-700 rounded hover:bg-teal-800 cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
                           >
-                            <Send className="w-3.5 h-3.5" />
-                            <span>Emitir</span>
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Reintentar</span>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => onEmitDoc(doc.id, true)}
-                            className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-amber-700 bg-white border border-amber-300 rounded hover:bg-amber-50 cursor-pointer"
-                            title="Simular rechazo técnico DIAN para probar flujo de reintento"
-                          >
-                            <AlertTriangle className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
-
-                      {doc.status === 'RECHAZADO' && (
-                        <button
-                          type="button"
-                          onClick={() => onEmitDoc(doc.id, false)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 cursor-pointer"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5" />
-                          <span>Reintentar</span>
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
