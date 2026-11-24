@@ -56,6 +56,28 @@ const DEPARTMENTS: ('Todos' | Department)[] = [
   'Calidad y Metrología',
 ];
 
+function getNextAvailablePeriodKey(periods: PayrollPeriod[]): string {
+  const existing = new Set(periods.map((p) => p.periodKey));
+  const sorted = [...periods].sort((a, b) => b.periodKey.localeCompare(a.periodKey));
+  const seed = sorted[0]?.periodKey ?? '2026-11';
+  const parts = seed.split('-').map(Number);
+  let year = parts[0] || 2026;
+  let month = parts[1] || 11;
+
+  for (let i = 0; i < 120; i += 1) {
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+    const candidate = `${year}-${String(month).padStart(2, '0')}`;
+    if (!existing.has(candidate)) {
+      return candidate;
+    }
+  }
+  return '2027-01';
+}
+
 export function PayrollView({
   db,
   period,
@@ -75,10 +97,19 @@ export function PayrollView({
   const [savingAdj, setSavingAdj] = useState(false);
 
   const [newPeriodModal, setNewPeriodModal] = useState(false);
-  const [newPeriodKey, setNewPeriodKey] = useState('2026-12');
-  const [newPeriodFreq, setNewPeriodFreq] = useState<PayrollFrequency>('Mensual');
+  const [newPeriodKey, setNewPeriodKey] = useState(() =>
+    getNextAvailablePeriodKey(db.periods),
+  );
+  const [newPeriodFreq, setNewPeriodFreq] = useState<PayrollFrequency>(
+    db.company.defaultFrequency,
+  );
+  const [periodError, setPeriodError] = useState<string | null>(null);
   const [creatingPeriod, setCreatingPeriod] = useState(false);
   const [processing, setProcessing] = useState(false);
+
+  const periodAlreadyExists = db.periods.some(
+    (p) => p.periodKey === newPeriodKey,
+  );
 
   const filtered = period.payslips.filter((p) => {
     const matchesSearch =
@@ -124,18 +155,38 @@ export function PayrollView({
         otherDeductions: Math.max(0, Number(deductionInput) || 0),
       });
       setEditingPayslip(null);
+    } catch {
+      // El mensaje ya se muestra en el toast global
     } finally {
       setSavingAdj(false);
     }
   }
 
+  function openNewPeriodModal() {
+    setNewPeriodKey(getNextAvailablePeriodKey(db.periods));
+    setNewPeriodFreq(db.company.defaultFrequency);
+    setPeriodError(null);
+    setNewPeriodModal(true);
+  }
+
   async function handleCreatePeriod(e: FormEvent) {
     e.preventDefault();
+    if (periodAlreadyExists) {
+      setPeriodError(
+        `El período ${newPeriodKey} ya existe. Elige otro mes o selecciónalo en el historial.`,
+      );
+      return;
+    }
     setCreatingPeriod(true);
+    setPeriodError(null);
     try {
       await onCreatePeriod(newPeriodKey, newPeriodFreq);
       onSelectPeriod(newPeriodKey);
       setNewPeriodModal(false);
+    } catch (err) {
+      setPeriodError(
+        err instanceof Error ? err.message : 'No se pudo crear el período.',
+      );
     } finally {
       setCreatingPeriod(false);
     }
@@ -145,8 +196,18 @@ export function PayrollView({
     setProcessing(true);
     try {
       await onProcessPeriod(period.periodKey, markPaid);
+    } catch {
+      // El mensaje ya se muestra en el toast global
     } finally {
       setProcessing(false);
+    }
+  }
+
+  async function handleFrequencyChange(freq: PayrollFrequency) {
+    try {
+      await onChangeFrequency(period.periodKey, freq);
+    } catch {
+      // El mensaje ya se muestra en el toast global
     }
   }
 
@@ -175,7 +236,7 @@ export function PayrollView({
                 <button
                   key={freq}
                   type="button"
-                  onClick={() => onChangeFrequency(period.periodKey, freq)}
+                  onClick={() => handleFrequencyChange(freq)}
                   className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer whitespace-nowrap ${
                     period.frequency === freq
                       ? 'bg-white text-slate-900 shadow-sm'
@@ -190,7 +251,7 @@ export function PayrollView({
 
           <button
             type="button"
-            onClick={() => setNewPeriodModal(true)}
+            onClick={openNewPeriodModal}
             className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 cursor-pointer whitespace-nowrap shrink-0"
           >
             <Plus className="w-4 h-4" />
@@ -620,9 +681,17 @@ export function PayrollView({
                   type="month"
                   required
                   value={newPeriodKey}
-                  onChange={(e) => setNewPeriodKey(e.target.value)}
+                  onChange={(e) => {
+                    setNewPeriodKey(e.target.value);
+                    setPeriodError(null);
+                  }}
                   className="w-full px-3 py-2 text-sm font-mono border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-600"
                 />
+                {periodAlreadyExists && (
+                  <p className="mt-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2.5 py-1.5">
+                    El período <span className="font-mono font-semibold">{newPeriodKey}</span> ya existe. Elige otro mes o selecciónalo directamente desde el panel.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -639,6 +708,12 @@ export function PayrollView({
                 </select>
               </div>
 
+              {periodError && !periodAlreadyExists && (
+                <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded px-2.5 py-1.5">
+                  {periodError}
+                </p>
+              )}
+
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
                 <button
                   type="button"
@@ -649,7 +724,11 @@ export function PayrollView({
                 </button>
                 <button
                   type="submit"
-                  disabled={creatingPeriod}
+                  disabled={
+                    creatingPeriod ||
+                    periodAlreadyExists ||
+                    !/^\d{4}-\d{2}$/.test(newPeriodKey)
+                  }
                   className="px-4 py-2 text-sm font-medium text-white bg-teal-700 rounded-md hover:bg-teal-800 disabled:opacity-60 cursor-pointer"
                 >
                   {creatingPeriod ? 'Creando...' : 'Crear Período'}

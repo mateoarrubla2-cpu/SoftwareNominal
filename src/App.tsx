@@ -997,7 +997,7 @@ export default function App() {
                       'PATCH',
                       undefined,
                       'Desprendible marcado como pagado',
-                    )
+                    ).catch(() => {})
                   }
                 />
               )}
@@ -1020,7 +1020,7 @@ export default function App() {
                       'PUT',
                       { benefitIds },
                       'Asignación de beneficios actualizada',
-                    )
+                    ).catch(() => {})
                   }
                 />
               )}
@@ -1048,7 +1048,7 @@ export default function App() {
                       'PATCH',
                       { status },
                       `Solicitud ${status.toLowerCase()}`,
-                    )
+                    ).catch(() => {})
                   }
                 />
               )}
@@ -1082,7 +1082,7 @@ export default function App() {
                       'PATCH',
                       { status },
                       `Eventualidad marcada como ${status}`,
-                    )
+                    ).catch(() => {})
                   }
                   onDeleteEventuality={(id) =>
                     mutate(
@@ -1090,7 +1090,7 @@ export default function App() {
                       'DELETE',
                       undefined,
                       'Eventualidad eliminada',
-                    )
+                    ).catch(() => {})
                   }
                 />
               )}
@@ -1144,7 +1144,7 @@ export default function App() {
                       simulateReject
                         ? 'Rechazo DIAN simulado (listo para reintento)'
                         : 'Documento XML aprobado por DIAN',
-                    )
+                    ).catch(() => {})
                   }
                   onEmitAllPeriod={(periodKey) =>
                     mutate(
@@ -1183,7 +1183,9 @@ export default function App() {
                     mutate(`/api/employees/${id}`, 'PUT', patch, 'Trabajador actualizado')
                   }
                   onDeleteEmployee={(id) =>
-                    mutate(`/api/employees/${id}`, 'DELETE', undefined, 'Trabajador eliminado')
+                    mutate(`/api/employees/${id}`, 'DELETE', undefined, 'Trabajador eliminado').catch(
+                      () => {},
+                    )
                   }
                 />
               )}
@@ -1227,7 +1229,7 @@ export default function App() {
                   'PATCH',
                   undefined,
                   'Pago confirmado en desprendible',
-                )
+                ).catch(() => {})
             : undefined
         }
       />

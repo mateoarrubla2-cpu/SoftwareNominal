@@ -105,6 +105,8 @@ export function VacationsView({
         notes: notes.trim(),
       });
       setModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

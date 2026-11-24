@@ -185,6 +185,8 @@ export function AdminSenaView({
         await onCreateInstructor(payload);
       }
       setInstModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }
@@ -228,6 +230,8 @@ export function AdminSenaView({
         await onCreateFicha(payload);
       }
       setFichaModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }
@@ -271,6 +275,8 @@ export function AdminSenaView({
         await onCreateStudent(payload);
       }
       setStudentModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }
@@ -288,6 +294,8 @@ export function AdminSenaView({
         await onDeleteStudent(confirmDelete.id);
       }
       setConfirmDelete(null);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

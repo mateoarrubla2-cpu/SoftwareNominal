@@ -145,6 +145,8 @@ export function EventualitiesView({
         description: description.trim() || `${type} registrada`,
       });
       closeModal();
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

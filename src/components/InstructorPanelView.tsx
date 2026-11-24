@@ -150,6 +150,8 @@ export function InstructorPanelView({
         await onCreateFicha(payload);
       }
       setFichaModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }
@@ -193,6 +195,8 @@ export function InstructorPanelView({
         await onCreateStudent(payload);
       }
       setStudentModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }
@@ -208,6 +212,8 @@ export function InstructorPanelView({
         await onDeleteStudent(confirmDelete.id);
       }
       setConfirmDelete(null);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

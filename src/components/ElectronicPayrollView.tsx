@@ -48,6 +48,8 @@ export function ElectronicPayrollView({
     setEmittingAll(true);
     try {
       await onEmitAllPeriod(period.periodKey);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setEmittingAll(false);
     }

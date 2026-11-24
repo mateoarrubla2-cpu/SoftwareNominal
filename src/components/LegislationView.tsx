@@ -63,6 +63,8 @@ export function LegislationView({
         icbfPct: Number(icbfPct) || 3,
         arlRates,
       });
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

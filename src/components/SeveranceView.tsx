@@ -68,6 +68,8 @@ export function SeveranceView({
         pendingSalaryDays: Number(pendingSalaryDays) || 0,
         markRetired,
       });
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

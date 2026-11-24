@@ -40,6 +40,8 @@ export function CompanySettingsModal({
         defaultFrequency,
       });
       onClose();
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }

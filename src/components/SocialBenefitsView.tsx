@@ -115,6 +115,8 @@ export function SocialBenefitsView({
         await onCreateBenefit(payload);
       }
       setEditModalOpen(false);
+    } catch {
+      // El toast global muestra el mensaje de error
     } finally {
       setSaving(false);
     }
