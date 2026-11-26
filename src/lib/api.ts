@@ -16,9 +16,22 @@ async function request<T>(
 
   if (!res.ok) {
     const errorText = await res.text().catch(() => '');
-    throw new Error(
-      errorText || `Error ${res.status} al llamar ${path}`
-    );
+    let message = `Error ${res.status} al llamar ${path}`;
+
+    try {
+      const errorJson = JSON.parse(errorText);
+      if (typeof errorJson.detail === 'string') {
+        message = errorJson.detail;
+      } else {
+        message = Object.entries(errorJson)
+          .map(([field, value]) => `${field}: ${Array.isArray(value) ? value.join(', ') : String(value)}`)
+          .join(' | ');
+      }
+    } catch {
+      if (errorText) message = 'No se pudo completar la operación. Revisa los datos ingresados.';
+    }
+
+    throw new Error(message);
   }
 
   if (res.status === 204) {
@@ -93,15 +106,15 @@ export const api = {
     list: () => get<{ results: InstructorSENA[] }>('/academico/instructores/'),
     create: (body: Partial<InstructorSENA>) =>
       post<InstructorSENA>('/academico/instructores/', body),
-    update: (id: string, body: Partial<InstructorSENA>) =>
+    update: (id: string | number, body: Partial<InstructorSENA>) =>
       put<InstructorSENA>(`/academico/instructores/${id}/`, body),
-    remove: (id: string) => del(`/academico/instructores/${id}/`),
+    remove: (id: string | number) => del(`/academico/instructores/${id}/`),
   },
   fichas: {
     list: () => get<{ results: FichaSENA[] }>('/academico/fichas/'),
     create: (body: Partial<FichaSENA>) =>
       post<FichaSENA>('/academico/fichas/', body),
-    update: (id: string, body: Partial<FichaSENA>) =>
+    update: (id: string | number, body: Partial<FichaSENA>) =>
       put<FichaSENA>(`/academico/fichas/${id}/`, body),
     remove: (id: string) => del(`/academico/fichas/${id}/`),
   },
@@ -109,7 +122,7 @@ export const api = {
     list: () => get<{ results: EstudianteSENA[] }>('/academico/estudiantes/'),
     create: (body: Partial<EstudianteSENA>) =>
       post<EstudianteSENA>('/academico/estudiantes/', body),
-    update: (id: string, body: Partial<EstudianteSENA>) =>
+    update: (id: string | number, body: Partial<EstudianteSENA>) =>
       put<EstudianteSENA>(`/academico/estudiantes/${id}/`, body),
     remove: (id: string) => del(`/academico/estudiantes/${id}/`),
   },
@@ -117,7 +130,7 @@ export const api = {
     list: () => get<{ results: EspacioTrabajo[] }>('/academico/espacios-trabajo/'),
     create: (body: Partial<EspacioTrabajo>) =>
       post<EspacioTrabajo>('/academico/espacios-trabajo/', body),
-    update: (id: string, body: Partial<EspacioTrabajo>) =>
+    update: (id: string | number, body: Partial<EspacioTrabajo>) =>
       put<EspacioTrabajo>(`/academico/espacios-trabajo/${id}/`, body),
     remove: (id: string) => del(`/academico/espacios-trabajo/${id}/`),
   },
@@ -125,9 +138,9 @@ export const api = {
     list: () => get<{ results: Empleado[] }>('/nomina/empleados/'),
     create: (body: Partial<Empleado>) =>
       post<Empleado>('/nomina/empleados/', body),
-    update: (id: string, body: Partial<Empleado>) =>
+    update: (id: string | number, body: Partial<Empleado>) =>
       put<Empleado>(`/nomina/empleados/${id}/`, body),
-    remove: (id: string) => del(`/nomina/empleados/${id}/`),
+    remove: (id: string | number) => del(`/nomina/empleados/${id}/`),
   },
   beneficios: {
     list: () => get<{ results: PlanBeneficio[] }>('/nomina/beneficios/'),
