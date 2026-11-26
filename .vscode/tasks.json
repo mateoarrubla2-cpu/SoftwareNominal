@@ -1,0 +1,98 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Django: runserver",
+            "type": "shell",
+            "command": "python manage.py runserver 127.0.0.1:8000",
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "env": {
+                "DEBUG": "True",
+                "ALLOWED_HOSTS": "localhost,127.0.0.1",
+                "DATABASE_URL": "sqlite:///db.sqlite3"
+            }
+        },
+        {
+            "label": "Django: makemigrations",
+            "type": "shell",
+            "command": "python manage.py makemigrations",
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Django: migrate",
+            "type": "shell",
+            "command": "python manage.py migrate",
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Django: check",
+            "type": "shell",
+            "command": "python manage.py check",
+            "group": "test",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Frontend: npm install",
+            "type": "shell",
+            "command": "npm install",
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Frontend: dev",
+            "type": "shell",
+            "command": "npm run dev",
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Frontend: build",
+            "type": "shell",
+            "command": "npm run build",
+            "group": "build",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Frontend: typecheck",
+            "type": "shell",
+            "command": "npx tsc --noEmit",
+            "group": "test",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Full Stack: start all",
+            "dependsOn": ["Django: runserver", "Frontend: dev"],
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

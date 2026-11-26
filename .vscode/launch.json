@@ -1,0 +1,70 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Django: Runserver",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": ["runserver", "127.0.0.1:8000"],
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+                "DJANGO_SETTINGS_MODULE": "inamoc_nomina.settings",
+                "DEBUG": "True",
+                "ALLOWED_HOSTS": "localhost,127.0.0.1",
+                "DATABASE_URL": "sqlite:///db.sqlite3"
+            },
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Django: Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": ["test"],
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+                "DJANGO_SETTINGS_MODULE": "inamoc_nomina.settings.test",
+                "DEBUG": "True"
+            },
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Frontend: Vite Dev",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMapPathOverrides": {
+                "webpack:///./src/*": "${webRoot}/*"
+            }
+        },
+        {
+            "name": "Full Stack: Django + Frontend",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": ["runserver", "127.0.0.1:8000"],
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+                "DJANGO_SETTINGS_MODULE": "inamoc_nomina.settings",
+                "DEBUG": "True",
+                "ALLOWED_HOSTS": "localhost,127.0.0.1",
+                "DATABASE_URL": "sqlite:///db.sqlite3"
+            },
+            "cwd": "${workspaceFolder}",
+            "serverReadyAction": {
+                "action": "launch",
+                "pattern": "Starting development server at http://127.0.0.1:8000",
+                "uriFormat": "http://localhost:5173",
+                "name": "Frontend: Vite Dev"
+            }
+        }
+    ]
+}
