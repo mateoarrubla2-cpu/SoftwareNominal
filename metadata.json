@@ -1,0 +1,6 @@
+{
+  "name": "Cuadra Nómina",
+  "description": "Sistema integral de gestión de nóminas empresariales, generación automática de recibos, control de vacaciones, beneficios adicionales y exportación directa a PDF y Excel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
